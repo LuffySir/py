@@ -1,9 +1,9 @@
 import os
 import string
 
-path = 'E:\\dataset\\polar_movie_new\\all_lda_10t'
-topicSepPath = 'E:\\dataset\\polar_movie_new\\all_lda_10'
-topicSepPathAdd0 = 'E:\\dataset\\polar_movie_new\\all_lda_10_addzero'
+path = 'E:\\dataset\\polar_movie_new\\20\\all_lda_20t'
+topicSepPath = 'E:\\dataset\\polar_movie_new\\20\\all_lda_20'
+topicSepPathAdd0 = 'E:\\dataset\\polar_movie_new\\20\\all_lda_20_addzero'
 
 path2 = 'E:\\dataset\\polar_movie\\test_lda_by_topic'
 path3 = 'E:\\dataset\\polar_movie\\test_lda'

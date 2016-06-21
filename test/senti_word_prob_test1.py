@@ -1,3 +1,4 @@
+#-*_coding:utf8-*-
 from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 from nltk.stem.porter import PorterStemmer
@@ -18,7 +19,7 @@ path_test = 'E:\\dataset\\polar_movie_new\\test';
 path_test_lda = 'E:\\dataset\\polar_movie_new\\test_lda'
 
 pathAll = 'E:\\dataset\\polar_movie_new\\all_del10';
-pathAllLda = 'E:\\dataset\\polar_movie_new\\all_lda_10t';
+pathAllLda = 'E:\\dataset\\polar_movie_new\\20\\all_lda_20t';
 
 path_senti = 'E:\\dataset\\sentiment word\\all.txt';
 
@@ -70,7 +71,7 @@ def getSentiWordStemmer(path):
         if line_senti in file_str:
             sentiWordTokens = stemmer(line_senti)
             for word in sentiWordTokens:
-                sentiWordStemmer[word] = sentiWordStemmer.get(word,0)+1
+                sentiWordStemmer[word] = sentiWordStemmer.get(word,0) + 1
     senti_file.close()
 #    sentiWordStemmerNone = sentiWordStemmer.copy()
 #    for word in sentiWordStemmer.keys():
@@ -115,7 +116,7 @@ def getLdaModel(path):
 
     dictionary = corpora.Dictionary(textsAll)
     corpus = [dictionary.doc2bow(text) for text in textsAll]
-    ldamodel = gensim.models.ldamodel.LdaModel(corpus,num_topics=10,id2word=dictionary, passes=20)
+    ldamodel = gensim.models.ldamodel.LdaModel(corpus,num_topics=20,id2word=dictionary, passes=20)
     return ldamodel
 
 def outputSentiPro(path,ldaPath):
@@ -130,7 +131,7 @@ def outputSentiPro(path,ldaPath):
 
         fin = open(ldafile,'w')
         sentiWordDict = dict()
-        for topic in ldamodel.print_topics(num_topics=10,num_words=len(texts)):
+        for topic in ldamodel.print_topics(num_topics=20,num_words=len(texts)):
             allDict = dict()
             topic = topic[1:]
             topic2str = str(topic).strip(string.punctuation)
