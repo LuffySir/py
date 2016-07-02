@@ -9,12 +9,23 @@ import re
 
 path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_neg'
 path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
-path3 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_tfidf'
+path3 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_tfidf1'
+path4 = 'E:\\dataset\\en_stop_word'
 
 tokenizer = RegexpTokenizer(r'\w+')
 
 # 加停用词
 en_stop = get_stop_words('english')
+with open(path4,'r') as en_stop_f:
+    for line in en_stop_f:
+        line = line.strip()
+        en_stop.append(line)
+# en_stop.append('don')
+en_stop.append('_the')
+en_stop.append('book')
+en_stop.append('read')
+en_stop.append('time')
+en_stop.append('people')
 
 # 词干化
 p_stemmer = PorterStemmer()
@@ -38,16 +49,17 @@ def remvLowFreWord(corpora):
     for word in wordNum.keys():
         if wordNum[word] < 11:
             low_wordNumList.append(word)
-    low_wordNumList.append('_the')
 
+    print(len(wordNum))
+    print(len(low_wordNumList))
+    # print('book 词数',wordNum['book'])
     return low_wordNumList
-
 
 def get_corpus(path):
     corpus_all_x = []
     with open(path, 'r') as f:
         for line in f:
-                # 对每一条评论进行预处理,得到的是列表
+            # 对每一条评论进行预处理,得到的是列表
             lineTokens = stemmer(line)
             # 预处理后的每一条评论添加到语料库列表中
             corpus_all_x = corpus_all_x + lineTokens
@@ -57,9 +69,9 @@ def get_corpus(path):
 
 def get_tfidf(path):
 
-    # corpus 负向语料列表(1000个元素)，corpus_all_neg 负向语料列表（1个元素）
+    # corpus 负向语料列表(1000个列表)，corpus_all_neg 负向语料列表（1000个元素）
     corpus, corpus_all_neg = get_corpus(path1)
-    # corpus 所有语料列表(2000个元素)，corpus_all_pos 正向语料列表（1个元素）
+    # corpus 所有语料列表(2000个列表)，corpus_all_pos 正向语料列表（1000个元素）
     corpus, corpus_all_pos = get_corpus(path2)
     # 所有语料（1个元素）
     corpus_all = corpus_all_neg + corpus_all_pos
@@ -80,7 +92,7 @@ def get_tfidf(path):
         # 每一条评论构成列表的一个元素
         corpus_after_process.append(review)
 
-    # print(corpus_after_process[1001])
+    print(corpus_after_process[1001])
 
     # 该类将文本中的词语转换成词频矩阵，矩阵元素a[i][j]表示词j在第i个文本下的词频
     vectorizer = CountVectorizer()

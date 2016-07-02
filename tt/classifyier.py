@@ -12,6 +12,7 @@ posids = movie_reviews.fileids('pos')
 
 negfeats = [(word_feats(movie_reviews.words(fileids=[f])), 'neg') for f in negids]
 posfeats = [(word_feats(movie_reviews.words(fileids=[f])), 'pos') for f in posids]
+print(negfeats[1])
 
 negcutoff = int(len(negfeats)*3/4)
 poscutoff = int(len(posfeats)*3/4)
