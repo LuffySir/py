@@ -5,10 +5,13 @@ from gensim import corpora, models
 import gensim
 import re
 import string
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
 
 path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_neg'
 path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
 path3 = 'E:\\dataset\\en_stop_word'
+path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic_tfidf\\review_text_tfidf_topic'
 
 tokenizer = RegexpTokenizer(r'\w+')
 
@@ -42,18 +45,18 @@ def stemmer(line):
     return stemmed_tokens
 
 
-def remvLowFreWord(corpora):
+def remvLowFreWord(all_corpora):
     wordNum = dict()
-    for word in corpora:
+    for word in all_corpora:
         wordNum[word] = wordNum.get(word, 0) + 1
     low_wordNumList = []
     for word in wordNum.keys():
         if wordNum[word] < 11:
             low_wordNumList.append(word)
 
-    print(len(wordNum))
+    print(len(wordNum))    # 15135
     # print('book 词数',wordNum['book'])
-    print(len(low_wordNumList))
+    print(len(low_wordNumList))    # 12879
 
     return low_wordNumList
 
@@ -71,7 +74,10 @@ def get_corpus(path):
     return corpus, corpus_all_x
 
 corpus = []
+# 用于lda计算,列表的列表[[xx,xx,xx],[yy,yy]...]
 corpus_after_process = []
+# 用于tfidf计算，列表[xx,yy...]
+corpus_after_process_tf = []
 
 # corpus 负向语料列表(1000个列表)，corpus_all_neg 负向语料列表（1000个元素）
 corpus, corpus_all_neg = get_corpus(path1)
@@ -80,8 +86,9 @@ corpus, corpus_all_pos = get_corpus(path2)
 # 所有语料（1个列表）
 corpus_all = corpus_all_neg + corpus_all_pos
 
-print(len(corpus_all))
-print(len(corpus))
+print(len(corpus_all))    # 126686
+print(len(corpus))    # 2000
+# print(corpus[1])   #corpus[i]是列表
 
 low_wordNumList = remvLowFreWord(corpus_all)
 for item in corpus:
@@ -89,14 +96,20 @@ for item in corpus:
     for word in item:
             # 不在低频词列表中的词
         if not word in low_wordNumList:
-            # item_remv_low.append(word)
-            item_remv_low += word
+            item_remv_low.append(word)
+            # item_remv_low += word
     # 每一条评论的列表转换成字符串
-    # review = ','.join(item_remv_low).replace(',', ' ')
-    # 每一条评论构成列表的一个元素
+    review = ','.join(item_remv_low).replace(',', ' ')
+    # 每一条评论构成列表的一个列表元素
     corpus_after_process.append(item_remv_low)
+    # 每一条评论构成列表的一个元素
+    corpus_after_process_tf.append(review)
 
-# print("corpus_after_process个数", len(corpus_after_process))
+print("corpus_after_process个数", len(corpus_after_process))
+print(corpus_after_process[1])
+print("corpus_after_process_tf个数", len(corpus_after_process_tf))
+print(corpus_after_process_tf[1])
+
 dictionary = corpora.Dictionary(corpus_after_process)
 cor = [dictionary.doc2bow(review) for review in corpus_after_process]
 
@@ -110,7 +123,7 @@ def get_topic_set(num):
         topics.append(list())
     # print(topics)
     # 初始化文档编号
-    count = 1
+    count = 0
     # c:文档集中文档对应的词袋向量
     for c in cor:
         # 概率值列表
@@ -135,14 +148,48 @@ def get_topic_set(num):
 
         count += 1
 
-    print(topics[0])
-    print(topics[1])
-    print(topics[2])
-    print(topics[3])
-    print(topics[4])
+    # print(topics[0])
+    # print(topics[1])
+    # print(topics[2])
+    # print(topics[3])
+    # print(topics[4])
     print(len(topics[0]), len(topics[1]), len(topics[2]), len(topics[3]), len(topics[4]))
     return topics
 
+
+def get_topic_tfidf(cor_list, topic_num, path_base):
+    # 该类将文本中的词语转换成词频矩阵，矩阵元素a[i][j]表示词j在第i个文本下的词频
+    vectorizer = CountVectorizer()
+    # 统计每个词语的tfidf
+    transformer = TfidfTransformer()
+
+    corpus_split = list()
+
+    for i in range(topic_num):
+        corpus_split.append(list())
+        for j in topics_list[i]:
+            # 把评论放到相应主题下的列表中
+            corpus_split[i].append(cor_list[j])
+        print('第', i, '个列表元素的长度', len(corpus_split[i]))
+
+        # 第一个fit_transformer是计算tfidf，第二个是转化成词频矩阵
+        tfidf = transformer.fit_transform(
+            vectorizer.fit_transform(corpus_split[i]))
+        # 获取词袋模型中的所有词语
+        word = vectorizer.get_feature_names()
+        # 将tfidf矩阵抽取出来，a[i][j]表示词j在第i个文本中的tfidf权重
+        weight = tfidf.toarray()
+
+        path = path_base + str(i)
+
+        with open(path, 'w') as f:
+            for m in range(len(weight)):
+                for n in range(len(word)):
+                    # f.write(word[n])
+                    # f.write(' ')
+                    f.write(str(weight[m][n]))
+                    f.write(' ')
+                f.write('\n')
+
 topics_list = get_topic_set(5)
-# for topic in ldamodel.print_topics(num_topics=5,num_words=10):
-#     print(topic)
+get_topic_tfidf(corpus_after_process_tf, 5, path_str)

@@ -16,7 +16,7 @@ tokenizer = RegexpTokenizer(r'\w+')
 
 # 加停用词
 en_stop = get_stop_words('english')
-with open(path4,'r') as en_stop_f:
+with open(path4, 'r') as en_stop_f:
     for line in en_stop_f:
         line = line.strip()
         en_stop.append(line)
@@ -30,6 +30,7 @@ en_stop.append('people')
 # 词干化
 p_stemmer = PorterStemmer()
 
+
 def stemmer(line):
     line = re.sub(r'([\d]+)', '', line)
     line_low = line.lower()
@@ -40,6 +41,7 @@ def stemmer(line):
     stemmed_tokens = [p_stemmer.stem(i) for i in stopped_tokens]
 
     return stemmed_tokens
+
 
 def remvLowFreWord(corpora):
     wordNum = dict()
@@ -55,6 +57,7 @@ def remvLowFreWord(corpora):
     # print('book 词数',wordNum['book'])
     return low_wordNumList
 
+
 def get_corpus(path):
     corpus_all_x = []
     with open(path, 'r') as f:
@@ -66,6 +69,7 @@ def get_corpus(path):
             # 预处理后的每一条评论添加到语料库列表中（列表的列表）
             corpus.append(lineTokens)
     return corpus, corpus_all_x
+
 
 def get_tfidf(path):
 

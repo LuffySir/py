@@ -23,6 +23,7 @@ en_stop = get_stop_words('english')
 # 词干化
 p_stemmer = PorterStemmer()
 
+
 def stemmer(line):
     line = re.sub(r'([\d]+)', '', line)
     line_low = line.lower()
@@ -33,6 +34,7 @@ def stemmer(line):
     stemmed_tokens = [p_stemmer.stem(i) for i in stopped_tokens]
 
     return stemmed_tokens
+
 
 def remvLowFreWord(corpora):
     wordNum = dict()
@@ -61,6 +63,7 @@ def get_corpus(path):
             corpus.append(lineTokens)
     return corpus, corpus_all_x
 
+
 def get_tfidf():
 
     # corpus 负向语料列表(1000个元素)，corpus_all_neg 负向语料列表（1个元素）
@@ -86,7 +89,7 @@ def get_tfidf():
         # 每一条评论构成列表的一个元素
         corpus_after_process.append(review)
 
-    # print(corpus_after_process[1001])
+    print(corpus_after_process[1])
 
     # 该类将文本中的词语转换成词频矩阵，矩阵元素a[i][j]表示词j在第i个文本下的词频
     vectorizer = CountVectorizer()
@@ -100,7 +103,7 @@ def get_tfidf():
     # 将tfidf矩阵抽取出来，a[i][j]表示词j在第i个文本中的tfidf权重
     weight = tfidf.toarray()
 
-    return word,weight
+    return word, weight
 
 # def tfidf_feats():
 #     word,weight = get_tfidf()
@@ -116,7 +119,6 @@ def get_tfidf():
 
 #     print(dict_list_neg[1])
 #     return dict_list_neg,dict_list_pos
-
 
 
 corpus = []
