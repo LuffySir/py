@@ -12,6 +12,7 @@ path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text
 path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
 path3 = 'E:\\dataset\\en_stop_word'
 path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic_tfidf\\review_text_tfidf_topic'
+path4 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic_tfidf\\label_list'
 
 tokenizer = RegexpTokenizer(r'\w+')
 
@@ -54,9 +55,9 @@ def remvLowFreWord(all_corpora):
         if wordNum[word] < 11:
             low_wordNumList.append(word)
 
-    print(len(wordNum))    # 15135
+    print('词数', len(wordNum))    # 15135
     # print('book 词数',wordNum['book'])
-    print(len(low_wordNumList))    # 12879
+    print('低频词数', len(low_wordNumList))    # 12879
 
     return low_wordNumList
 
@@ -86,8 +87,8 @@ corpus, corpus_all_pos = get_corpus(path2)
 # 所有语料（1个列表）
 corpus_all = corpus_all_neg + corpus_all_pos
 
-print(len(corpus_all))    # 126686
-print(len(corpus))    # 2000
+# print(len(corpus_all))    # 126686
+# print(len(corpus))    # 2000
 # print(corpus[1])   #corpus[i]是列表
 
 low_wordNumList = remvLowFreWord(corpus_all)
@@ -144,17 +145,28 @@ def get_topic_set(num):
         # 概率最大的，也加入到相应的集合中
         if (count not in topics[prob_list.index(max_prob)]):
             topics[prob_list.index(max_prob)].append(count)
-        # print("当前主题列表", topics)
 
         count += 1
 
-    # print(topics[0])
-    # print(topics[1])
-    # print(topics[2])
-    # print(topics[3])
-    # print(topics[4])
-    print(len(topics[0]), len(topics[1]), len(topics[2]), len(topics[3]), len(topics[4]))
     return topics
+
+
+def get_label(topic_num, label_path_base):
+
+    for j in range(topic_num):
+        label_path = label_path_base + str(j)
+        with open(label_path, 'w') as labelFile:
+
+            for i in range(len(topics_list[j])):
+                labelFile.write(str(topics_list[j][i]))
+                labelFile.write(' ')
+                # 大于1000的是正向
+                if topics_list[j][i] >= 1000:
+                    labelFile.write('1')
+                else:
+                    labelFile.write('0')
+                labelFile.write('\n')
+
 
 
 def get_topic_tfidf(cor_list, topic_num, path_base):
@@ -192,4 +204,7 @@ def get_topic_tfidf(cor_list, topic_num, path_base):
                 f.write('\n')
 
 topics_list = get_topic_set(5)
+
+get_label(5, path4)
+
 get_topic_tfidf(corpus_after_process_tf, 5, path_str)
