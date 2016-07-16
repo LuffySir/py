@@ -7,12 +7,15 @@ import re
 import string
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
+import linecache
 
 path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_neg'
 path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
 path3 = 'E:\\dataset\\en_stop_word'
-path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic_tfidf\\review_text_tfidf_topic'
-path4 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic_tfidf\\label_list'
+path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_tfidf\\review_text_tfidf_topic'
+label_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_tfidf_label\\label_list'
+score_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_score\\score_list'
+score_all = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_score'
 
 tokenizer = RegexpTokenizer(r'\w+')
 
@@ -55,7 +58,7 @@ def remvLowFreWord(all_corpora):
         if wordNum[word] < 11:
             low_wordNumList.append(word)
 
-    print('词数', len(wordNum))    # 15135
+    print('词数', len(wordNum))
     # print('book 词数',wordNum['book'])
     print('低频词数', len(low_wordNumList))    # 12879
 
@@ -114,7 +117,7 @@ print(corpus_after_process_tf[1])
 dictionary = corpora.Dictionary(corpus_after_process)
 cor = [dictionary.doc2bow(review) for review in corpus_after_process]
 
-ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=5, id2word=dictionary, passes=20, minimum_probability=0.0001)
+ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=10, id2word=dictionary, passes=20, minimum_probability=0.00000001)
 
 
 def get_topic_set(num):
@@ -134,9 +137,10 @@ def get_topic_set(num):
         for i in range(num):
             # print(ldamodel[c][i])
             # 概率值加入到概率值列表
+            # minimum_probability 如果不够小，可能导致越界
             prob_list.append(ldamodel[c][i][1])
             # 如果概率值大于0.4，加入到相应的集合中
-            if ldamodel[c][i][1] >= 0.4:
+            if ldamodel[c][i][1] >= 2 / num:
                 topics[ldamodel[c][i][0]].append(count)
                 # print("当前主题列表", topics)
         # print("概率列表", prob_list)
@@ -151,22 +155,28 @@ def get_topic_set(num):
     return topics
 
 
-def get_label(topic_num, label_path_base):
+def get_label(topic_num, label_path_main, score_path_main):
 
     for j in range(topic_num):
-        label_path = label_path_base + str(j)
+        label_path = label_path_main + str(j)
+        score_path = score_path_main + str(j)
         with open(label_path, 'w') as labelFile:
+            with open(score_path, 'w') as score_file:
+                for i in range(len(topics_list[j])):
+                    # 读取指定行，返回列表(路径，行号)
+                    score = linecache.getline(score_all, topics_list[j][i] + 1)
+                    # 取返回列表中的元素
+                    score_file.write(score[0])
+                    score_file.write('\n')
 
-            for i in range(len(topics_list[j])):
-                labelFile.write(str(topics_list[j][i]))
-                labelFile.write(' ')
-                # 大于1000的是正向
-                if topics_list[j][i] >= 1000:
-                    labelFile.write('1')
-                else:
-                    labelFile.write('0')
-                labelFile.write('\n')
-
+                    labelFile.write(str(topics_list[j][i]))
+                    labelFile.write(' ')
+                    # 大于1000的是正向
+                    if topics_list[j][i] >= 1000:
+                        labelFile.write('1')
+                    else:
+                        labelFile.write('0')
+                    labelFile.write('\n')
 
 
 def get_topic_tfidf(cor_list, topic_num, path_base):
@@ -203,8 +213,8 @@ def get_topic_tfidf(cor_list, topic_num, path_base):
                     f.write(' ')
                 f.write('\n')
 
-topics_list = get_topic_set(5)
+topics_list = get_topic_set(10)
 
-get_label(5, path4)
+get_label(10, label_path_base, score_path_base)
 
-get_topic_tfidf(corpus_after_process_tf, 5, path_str)
+get_topic_tfidf(corpus_after_process_tf, 10, path_str)
