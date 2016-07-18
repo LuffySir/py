@@ -8,13 +8,14 @@ import string
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 import linecache
+import random
 
 path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_neg'
 path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
 path3 = 'E:\\dataset\\en_stop_word'
-path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_tfidf\\review_text_tfidf_topic'
-label_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_tfidf_label\\label_list'
-score_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic10\\topic_score\\score_list'
+path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_tfidf\\review_text_tfidf_topic'
+label_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_tfidf_label\\label_list'
+score_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_score\\score_list'
 score_all = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_score'
 
 tokenizer = RegexpTokenizer(r'\w+')
@@ -117,7 +118,7 @@ print(corpus_after_process_tf[1])
 dictionary = corpora.Dictionary(corpus_after_process)
 cor = [dictionary.doc2bow(review) for review in corpus_after_process]
 
-ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=10, id2word=dictionary, passes=20, minimum_probability=0.00000001)
+ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=25, id2word=dictionary, passes=20, minimum_probability=0.00000001)
 
 
 def get_topic_set(num):
@@ -140,9 +141,11 @@ def get_topic_set(num):
             # minimum_probability 如果不够小，可能导致越界
             prob_list.append(ldamodel[c][i][1])
             # 如果概率值大于0.4，加入到相应的集合中
-            if ldamodel[c][i][1] >= 2 / num:
+            # if ldamodel[c][i][1] >= 2 / num:
+            if ldamodel[c][i][1] >= 0.2:
                 topics[ldamodel[c][i][0]].append(count)
                 # print("当前主题列表", topics)
+
         # print("概率列表", prob_list)
         max_prob = max(prob_list)
         # print("最大概率", max_prob)
@@ -151,6 +154,12 @@ def get_topic_set(num):
             topics[prob_list.index(max_prob)].append(count)
 
         count += 1
+
+    for k in range(num):
+        while (len(topics[k]) < 100):
+            rand_count = random.randint(0, 1999)
+            if (rand_count not in topics[k]):
+                topics[k].append(rand_count)
 
     return topics
 
@@ -213,8 +222,8 @@ def get_topic_tfidf(cor_list, topic_num, path_base):
                     f.write(' ')
                 f.write('\n')
 
-topics_list = get_topic_set(10)
+topics_list = get_topic_set(25)
 
-get_label(10, label_path_base, score_path_base)
+get_label(25, label_path_base, score_path_base)
 
-get_topic_tfidf(corpus_after_process_tf, 10, path_str)
+get_topic_tfidf(corpus_after_process_tf, 25, path_str)
