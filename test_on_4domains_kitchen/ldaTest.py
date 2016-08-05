@@ -10,13 +10,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 import linecache
 import random
 
-path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_neg'
-path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_text_pos'
+path1 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\review_text_neg'
+path2 = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\review_text_pos'
 path3 = 'E:\\dataset\\en_stop_word'
-path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_tfidf\\review_text_tfidf_topic'
-label_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_tfidf_label\\label_list'
-score_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\topic25\\topic_score\\score_list'
-score_all = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\books\\review_score'
+path_str = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\topic5\\topic_tfidf\\review_text_tfidf_topic'
+label_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\topic5\\topic_tfidf_label\\label_list'
+score_path_base = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\topic5\\topic_score\\score_list'
+score_all = 'E:\\dataset\\domain_sentiment_data\\sorted_data_acl\\kitchen\\review_score'
 
 tokenizer = RegexpTokenizer(r'\w+')
 
@@ -29,10 +29,7 @@ with open(path3, 'r') as en_stop_f:
 
 # en_stop.append('don')
 en_stop.append('_the')
-en_stop.append('book')
-en_stop.append('read')
-en_stop.append('time')
-en_stop.append('people')
+
 
 # 词干化
 p_stemmer = PorterStemmer()
@@ -118,7 +115,7 @@ print(corpus_after_process_tf[1])
 dictionary = corpora.Dictionary(corpus_after_process)
 cor = [dictionary.doc2bow(review) for review in corpus_after_process]
 
-ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=25, id2word=dictionary, passes=20, minimum_probability=0.00000001)
+ldamodel = gensim.models.ldamodel.LdaModel(cor, num_topics=5, id2word=dictionary, passes=20, minimum_probability=0.00000001)
 
 
 def get_topic_set(num):
@@ -222,8 +219,8 @@ def get_topic_tfidf(cor_list, topic_num, path_base):
                     f.write(' ')
                 f.write('\n')
 
-topics_list = get_topic_set(25)
+topics_list = get_topic_set(5)
 
-get_label(25, label_path_base, score_path_base)
+get_label(5, label_path_base, score_path_base)
 
-get_topic_tfidf(corpus_after_process_tf, 25, path_str)
+get_topic_tfidf(corpus_after_process_tf, 5, path_str)
